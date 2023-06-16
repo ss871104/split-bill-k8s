@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: batch-service-config
+  namespace: menstalk
+data:
+  application.yml: |
+    opentracing:
+      jaeger:
+        enabled: true
+        log-spans: false
+        const-sampler:
+          decision: true
+        udp-sender:
+          host: jaeger.monitoring
+          port: 6831
+    
+    spring:
+      application:
+        name: batch-service
+      sleuth:
+        enabled: false
+      batch:
+        job:
+          enabled: false
+      kafka:
+        bootstrap-servers: kafka.kafka:9092
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          properties:
+            retries: 3
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,prometheus
+

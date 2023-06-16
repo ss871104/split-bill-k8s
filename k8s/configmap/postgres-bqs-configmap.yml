@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-init-script-bqs
+  namespace: db
+data:
+  bill-query-service.sql: |
+    CREATE DATABASE bill_query_service;
+    \c bill_query_service
+    
+    CREATE TABLE IF NOT EXISTS bill(
+    bill_id BIGINT PRIMARY KEY,
+    party_id BIGINT,
+    bill_name VARCHAR(255),
+    bill_type INT,
+    total_amount BIGINT,
+    create_time TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS bill_detail(
+    bill_detail_id BIGINT PRIMARY KEY,
+    bill_id BIGINT REFERENCES bill(bill_id),
+    member_id BIGINT,
+    bill_detail_type INT,
+    amount BIGINT
+    );

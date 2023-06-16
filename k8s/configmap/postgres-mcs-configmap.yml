@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-init-script-mcs
+  namespace: db
+data:
+  master-command-service.sql: |
+    CREATE DATABASE master_command_service;
+    \c master_command_service
+
+    CREATE TABLE IF NOT EXISTS "user"(
+        user_id       BIGINT PRIMARY KEY,
+        username      VARCHAR(255) UNIQUE,
+        name          VARCHAR(255),
+        register_time TIMESTAMP,
+        user_status   INT
+    );
+
+    CREATE TABLE IF NOT EXISTS party(
+        party_id     BIGSERIAL PRIMARY KEY,
+        party_name   VARCHAR(255),
+        create_time  TIMESTAMP,
+        party_status INT
+    );
+
+    CREATE TABLE IF NOT EXISTS "member"(
+        member_id       BIGSERIAL PRIMARY KEY,
+        party_id        BIGINT REFERENCES party (party_id),
+        user_id         BIGINT REFERENCES "user" (user_id),
+        balance         BIGINT,
+        member_nickname VARCHAR(255),
+        create_time     TIMESTAMP,
+        member_status   INT,
+        version         BIGINT
+    );

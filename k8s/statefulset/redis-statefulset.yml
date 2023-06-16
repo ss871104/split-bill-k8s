@@ -1,0 +1,50 @@
+# Redis configuration
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: db
+spec:
+  serviceName: "redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - image: redis:latest
+          name: redis
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: redis-persistent-storage
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-persistent-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 4Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: db
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      nodePort: 30079
+  selector:
+    app: redis
+  type: NodePort
+

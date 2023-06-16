@@ -1,0 +1,108 @@
+# Deployment for bill-command-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bill-command-service
+  namespace: menstalk
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bill-command-service
+  template:
+    metadata:
+      labels:
+        app: bill-command-service
+    spec:
+      containers:
+        - name: bill-command-service
+          image: ss871104/split-bill-microservices-bill-command-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8300
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bill-command-service-secret
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bill-command-service-secret
+                  key: db_password
+          envFrom:
+            - configMapRef:
+                name: bill-command-service-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8300
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8300
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: bill-command-service-config
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bill-command-service-autoscaler
+  namespace: menstalk
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bill-command-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+
+# Service for bill-command-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: bill-command-service
+  namespace: menstalk
+spec:
+  selector:
+    app: bill-command-service
+  ports:
+    - protocol: TCP
+      port: 8300
+      targetPort: 8300
+  type: ClusterIP

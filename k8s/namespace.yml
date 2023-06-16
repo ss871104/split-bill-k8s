@@ -1,0 +1,29 @@
+# Namespace for Postgresql and Redis and Cassandra
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: db
+
+---
+
+# Namespace for Kafka and Zookeeper
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kafka
+
+---
+
+# Namespace for Prometheus and Grafana and Jaeger
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+
+---
+
+# Namespace for My Services
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: menstalk

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     10s
+      evaluation_interval: 10s
+    scrape_configs:
+    - job_name: 'api_gateway'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['api-gateway.menstalk.svc.cluster.local:80']
+  
+    - job_name: 'auth_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['auth-service.menstalk.svc.cluster.local:8000']
+  
+    - job_name: 'master_command_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['master-command-service.menstalk.svc.cluster.local:8100']
+  
+    - job_name: 'master_query_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['master-query-service.menstalk.svc.cluster.local:8200']
+  
+    - job_name: 'bill_command_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['bill-command-service.menstalk.svc.cluster.local:8300']
+          
+    - job_name: 'bill_query_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: ['bill-query-service.menstalk.svc.cluster.local:8400']
+  
+    - job_name: 'notification_service'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets: [ 'notification-service.menstalk.svc.cluster.local:8500' ]

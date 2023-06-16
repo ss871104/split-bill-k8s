@@ -1,0 +1,45 @@
+# Deployment for batch-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: batch-service
+  namespace: menstalk
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: batch-service
+  template:
+    metadata:
+      labels:
+        app: batch-service
+    spec:
+      containers:
+        - name: batch-service
+          image: ss871104/split-bill-microservices-batch-service
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+          envFrom:
+            - configMapRef:
+                name: batch-service-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: batch-service-config

@@ -1,0 +1,113 @@
+# Deployment for bill-query-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bill-query-service
+  namespace: menstalk
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bill-query-service
+  template:
+    metadata:
+      labels:
+        app: bill-query-service
+    spec:
+      containers:
+        - name: bill-query-service
+          image: ss871104/split-bill-microservices-bill-query-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8400
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bill-query-service-secret
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bill-query-service-secret
+                  key: db_password
+          envFrom:
+            - configMapRef:
+                name: bill-query-service-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8400
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8400
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: admin-volume
+              mountPath: /admin
+      volumes:
+        - name: config-volume
+          configMap:
+            name: bill-query-service-config
+        - name: admin-volume
+          configMap:
+            name: admin-list-config
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bill-query-service-autoscaler
+  namespace: menstalk
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bill-query-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+
+# Service for bill-query-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: bill-query-service
+  namespace: menstalk
+spec:
+  selector:
+    app: bill-query-service
+  ports:
+    - protocol: TCP
+      port: 8400
+      targetPort: 8400
+  type: ClusterIP

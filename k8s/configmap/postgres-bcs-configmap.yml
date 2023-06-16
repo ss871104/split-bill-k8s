@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-init-script-bcs
+  namespace: db
+data:
+  bill-command-service.sql: |
+    CREATE DATABASE bill_command_service;
+    \c bill_command_service
+    
+    CREATE TABLE IF NOT EXISTS bill(
+    bill_id BIGSERIAL PRIMARY KEY,
+    party_id BIGINT,
+    bill_name VARCHAR(255),
+    bill_type INT,
+    total_amount BIGINT,
+    create_time TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS bill_detail(
+    bill_detail_id BIGSERIAL PRIMARY KEY,
+    bill_id BIGINT REFERENCES bill(bill_id),
+    member_id BIGINT,
+    bill_detail_type INT,
+    amount BIGINT
+    );

@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: menstalk
+data:
+  application.yml: |
+    server:
+      port: 80
+
+    opentracing:
+      jaeger:
+        enabled: true
+        log-spans: false
+        const-sampler:
+          decision: true
+        udp-sender:
+          host: jaeger.monitoring
+          port: 6831
+
+    spring:
+      application:
+        name: api-gateway
+      main:
+        web-application-type: reactive
+      sleuth:
+        enabled: false
+      cloud:
+        gateway:
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins: "*"
+                allowedHeaders: "*"
+                allowedMethods: "*"
+          routes:
+            - id: auth-service
+              uri: http://auth-service.menstalk.svc.cluster.local:8000
+              predicates:
+                - Path=/auth-service/**
+              filters:
+                - StripPrefix=1
+            - id: master-command-service
+              uri: http://master-command-service.menstalk.svc.cluster.local:8100
+              predicates:
+                - Path=/master-command-service/**
+              filters:
+                - StripPrefix=1
+            - id: master-query-service
+              uri: http://master-query-service.menstalk.svc.cluster.local:8200
+              predicates:
+                - Path=/master-query-service/**
+              filters:
+                - StripPrefix=1
+            - id: bill-command-service
+              uri: http://bill-command-service.menstalk.svc.cluster.local:8300
+              predicates:
+                - Path=/bill-command-service/**
+              filters:
+                - StripPrefix=1
+            - id: bill-query-service
+              uri: http://bill-query-service.menstalk.svc.cluster.local:8400
+              predicates:
+                - Path=/bill-query-service/**
+              filters:
+                - StripPrefix=1
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,prometheus
+            
+    jwt:
+      variables:
+        jwtSecret: ${JWT_SECRET}
+        jwtExpirationMs: ${JWT_EXPIRATION_MS}
+        

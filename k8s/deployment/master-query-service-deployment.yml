@@ -1,0 +1,113 @@
+# Deployment for master-query-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: master-query-service
+  namespace: menstalk
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: master-query-service
+  template:
+    metadata:
+      labels:
+        app: master-query-service
+    spec:
+      containers:
+        - name: master-query-service
+          image: ss871104/split-bill-microservices-master-query-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8200
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: master-query-service-secret
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: master-query-service-secret
+                  key: db_password
+          envFrom:
+            - configMapRef:
+                name: master-query-service-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8200
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8200
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: admin-volume
+              mountPath: /admin
+      volumes:
+        - name: config-volume
+          configMap:
+            name: master-query-service-config
+        - name: admin-volume
+          configMap:
+            name: admin-list-config
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: master-query-service-autoscaler
+  namespace: menstalk
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: master-query-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+---
+
+# Service for master-query-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: master-query-service
+  namespace: menstalk
+spec:
+  selector:
+    app: master-query-service
+  ports:
+    - protocol: TCP
+      port: 8200
+      targetPort: 8200
+  type: ClusterIP

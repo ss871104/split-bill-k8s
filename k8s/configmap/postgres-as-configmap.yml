@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-init-script-as
+  namespace: db
+data:
+  auth-service.sql: |
+    CREATE DATABASE auth_service;
+    \c auth_service
+    
+    CREATE TABLE IF NOT EXISTS auth(
+    auth_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
+    name VARCHAR(255),
+    status INT
+    );

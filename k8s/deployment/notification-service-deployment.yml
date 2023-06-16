@@ -1,0 +1,87 @@
+# Deployment for notification-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: menstalk
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: ss871104/split-bill-microservices-notification-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8500
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-secret
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-secret
+                  key: db_password
+          envFrom:
+            - configMapRef:
+                name: notification-service-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8500
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8500
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: notification-service-config
+
+---
+
+# Service for notification-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: menstalk
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - protocol: TCP
+      port: 8500
+      targetPort: 8500
+      nodePort: 30500
+  type: NodePort
