@@ -156,6 +156,13 @@ pipeline {
             }
         }
 
+        stage('Check Helm') {
+            steps {
+                sh 'helm version'
+            }
+        }
+
+
         stage('Deploy Ingress Controller') {
             steps {
                 sh 'helm upgrade --install --namespace menstalk ingress-nginx ingress-nginx/ingress-nginx'
