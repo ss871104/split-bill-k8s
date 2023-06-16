@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'ss871104'
-        PATH = "${env.PATH}:/usr/local/bin"
+        PATH = "${env.PATH}:/usr/local/bin:/opt/homebrew/bin"
     }
 
     tools {
