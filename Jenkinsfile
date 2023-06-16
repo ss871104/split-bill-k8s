@@ -156,6 +156,13 @@ pipeline {
             }
         }
 
+        stage('Deploy Ingress Controller') {
+            steps {
+                sh 'helm upgrade --install --namespace menstalk ingress-nginx ingress-nginx/ingress-nginx'
+            }
+        }
+
+
         stage('Deploy My Services to Kubernetes') {
             steps {
                 dir('k8s/deployment') {
@@ -163,6 +170,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Ingress Resources') {
+            steps {
+                dir('k8s/ingress') {
+                    sh 'kubectl apply -f .'
+                }
+            }
+        }
+
 
         stage('Cleanup') {
             steps {
