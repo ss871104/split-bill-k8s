@@ -64,12 +64,6 @@ data:
                 - Path=/bill-query-service/**
               filters:
                 - StripPrefix=1
-            - id: notification-service
-              uri: http://notification-service.menstalk.svc.cluster.local:8500
-              predicates:
-                - Path=/notification-service/**
-              filters:
-                - StripPrefix=1
 
     management:
       endpoints:

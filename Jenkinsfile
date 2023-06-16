@@ -178,6 +178,34 @@ pipeline {
             }
         }
 
+        stage('Check Ingress Controller') {
+            steps {
+                script {
+                    def ready = false
+                    for (int i = 0; i < 30; i++) {  // Try for up to 5 minutes
+                        def status = sh(script: '''
+                    kubectl get pods --namespace menstalk -l app.kubernetes.io/name=ingress-nginx -o jsonpath='{.items[*].status.phase}'
+                ''', returnStdout: true).trim()
+
+                        if (status == 'Running') {
+                            ready = true
+                            break
+                        }
+
+                        echo 'Ingress Controller not ready yet, retrying in 10 seconds...'
+                        sleep 10
+                    }
+
+                    if (!ready) {
+                        error('Ingress Controller did not become ready within 5 minutes')
+                    }
+
+                    echo 'Ingress Controller is ready.'
+                }
+            }
+        }
+
+
         stage('Deploy Ingress Resources') {
             steps {
                 dir('k8s/ingress') {
