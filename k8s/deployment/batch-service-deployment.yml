@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: batch-service
-          image: ss871104/split-bill-microservices-batch-service
+          image: ss871104/split-bill-k8s-batch-service
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_CONFIG_LOCATION

@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: ss871104/split-bill-microservices-auth-service
+          image: ss871104/split-bill-k8s-auth-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000

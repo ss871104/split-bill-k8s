@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: ss871104/split-bill-microservices-api-gateway
+          image: ss871104/split-bill-k8s-api-gateway
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

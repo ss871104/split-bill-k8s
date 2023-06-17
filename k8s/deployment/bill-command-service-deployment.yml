@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: bill-command-service
-          image: ss871104/split-bill-microservices-bill-command-service
+          image: ss871104/split-bill-k8s-bill-command-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8300

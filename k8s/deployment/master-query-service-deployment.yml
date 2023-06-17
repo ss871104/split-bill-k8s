@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: master-query-service
-          image: ss871104/split-bill-microservices-master-query-service
+          image: ss871104/split-bill-k8s-master-query-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8200

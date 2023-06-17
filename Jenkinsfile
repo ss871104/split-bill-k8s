@@ -30,56 +30,56 @@ pipeline {
                 stage('Build api-gateway image') {
                     steps {
                         dir('api-gateway') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-api-gateway ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-api-gateway ."
                         }
                     }
                 }
                 stage('Build auth-service image') {
                     steps {
                         dir('auth-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-auth-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-auth-service ."
                         }
                     }
                 }
                 stage('Build master-command-service image') {
                     steps {
                         dir('master-command-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-master-command-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-master-command-service ."
                         }
                     }
                 }
                 stage('Build master-query-service image') {
                     steps {
                         dir('master-query-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-master-query-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-master-query-service ."
                         }
                     }
                 }
                 stage('Build bill-command-service image') {
                     steps {
                         dir('bill-command-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-bill-command-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-bill-command-service ."
                         }
                     }
                 }
                 stage('Build bill-query-service image') {
                     steps {
                         dir('bill-query-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-bill-query-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-bill-query-service ."
                         }
                     }
                 }
                 stage('Build notification-service image') {
                     steps {
                         dir('notification-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-notification-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-notification-service ."
                         }
                     }
                 }
                 stage('Build batch-service image') {
                     steps {
                         dir('batch-service') {
-                            sh "docker build -t $DOCKER_REGISTRY/split-bill-microservices-batch-service ."
+                            sh "docker build -t $DOCKER_REGISTRY/split-bill-k8s-batch-service ."
                         }
                     }
                 }

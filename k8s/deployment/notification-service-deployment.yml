@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: ss871104/split-bill-microservices-notification-service
+          image: ss871104/split-bill-k8s-notification-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8500

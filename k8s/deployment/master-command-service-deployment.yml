@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: master-command-service
-          image: ss871104/split-bill-microservices-master-command-service
+          image: ss871104/split-bill-k8s-master-command-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8100
