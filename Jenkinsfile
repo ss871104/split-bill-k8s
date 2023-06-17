@@ -178,29 +178,30 @@ pipeline {
             }
         }
 
-        stage('Check Ingress Controller') {
+        stage('Check Webhook Service') {
             steps {
                 script {
                     def ready = false
                     for (int i = 0; i < 30; i++) {  // Try for up to 5 minutes
-                        def status = sh(script: '''
-                    kubectl get pods --namespace menstalk -l app.kubernetes.io/name=ingress-nginx -o jsonpath='{.items[*].status.phase}'
-                ''', returnStdout: true).trim()
-
-                        if (status == 'Running') {
+                        try {
+                            // Try to call the webhook service
+                            sh(script: '''
+                                kubectl run --rm -i --tty --restart=Never dummy --image=alpine -- sh -c "apk add curl && curl -k https://ingress-nginx-controller-admission.menstalk.svc:443"
+                            ''', returnStdout: true).trim()
                             ready = true
                             break
+                        } catch (Exception e) {
+                            // Ignore the exception and retry after 10 seconds
+                            echo 'Webhook service not ready yet, retrying in 10 seconds...'
+                            sleep 10
                         }
-
-                        echo 'Ingress Controller not ready yet, retrying in 10 seconds...'
-                        sleep 10
                     }
 
                     if (!ready) {
-                        error('Ingress Controller did not become ready within 5 minutes')
+                        error('Webhook service did not become ready within 5 minutes')
                     }
 
-                    echo 'Ingress Controller is ready.'
+                    echo 'Webhook service is ready.'
                 }
             }
         }
