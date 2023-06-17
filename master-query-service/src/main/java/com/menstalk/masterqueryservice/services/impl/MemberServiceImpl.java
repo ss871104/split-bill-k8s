@@ -36,7 +36,7 @@ public class MemberServiceImpl implements MemberService {
             List<MemberResponse> memberResponseList = new ArrayList<>();
 
             try {
-                members = memberRepository.findActiveMemberByPartyId(partyId);
+                members = memberRepository.findMemberByPartyId(partyId);
                 members.forEach(x -> {
                     if (Boolean.FALSE.equals(redisTemplate.hasKey("member::" + x.getMemberId()))) {
                         redisTemplate.opsForValue().set("member::" + x.getMemberId(), memberConvert.memberConvertToMemberResponse(x));
