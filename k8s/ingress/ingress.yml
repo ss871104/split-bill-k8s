@@ -17,6 +17,13 @@ spec:
                 port:
                   number: 80
           - pathType: Prefix
+            path: "/static"
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+          - pathType: Prefix
             path: "/notification"
             backend:
               service:
