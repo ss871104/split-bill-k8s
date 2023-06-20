@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final MemberConvert memberConvert;
-    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public List<MemberResponse> getMembersByPartyId(Long partyId) {
@@ -37,14 +36,6 @@ public class MemberServiceImpl implements MemberService {
 
             try {
                 members = memberRepository.findMemberByPartyId(partyId);
-                members.forEach(x -> {
-                    if (Boolean.FALSE.equals(redisTemplate.hasKey("member::" + x.getMemberId()))) {
-                        redisTemplate.opsForValue().set("member::" + x.getMemberId(), memberConvert.memberConvertToMemberResponse(x));
-                        memberResponseList.add(memberConvert.memberConvertToMemberResponse(x));
-                    } else {
-                        memberResponseList.add((MemberResponse) redisTemplate.opsForValue().get("member::" + x.getMemberId()));
-                    }
-                });
             } catch (Exception e) {
                 throw new CustomException("DB ERROR!");
             }
@@ -52,7 +43,9 @@ public class MemberServiceImpl implements MemberService {
                 throw new CustomException("member not found!");
             }
 
-            return memberResponseList;
+            return members.stream()
+                    .map(memberConvert::memberConvertToMemberResponse)
+                    .collect(Collectors.toList());
         } catch (CustomException e) {
             e.printStackTrace();
             throw e;

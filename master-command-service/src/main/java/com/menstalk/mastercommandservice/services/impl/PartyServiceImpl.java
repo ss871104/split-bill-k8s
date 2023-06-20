@@ -34,7 +34,6 @@ public class PartyServiceImpl implements PartyService {
 	private final PartyRepository partyRepository;
 	private final MemberRepository memberRepository;
 	private final UserRepository userRepository;
-	private final RedisTemplate<String, Object> redisTemplate;
 	private final KafkaTemplate<String, String> kafkaTemplate;
 	private final ObjectMapper objectMapper;
 
@@ -123,7 +122,6 @@ public class PartyServiceImpl implements PartyService {
 
 			members.forEach(x -> {
 				x.setMemberStatus(Status.DISABLED);
-				redisTemplate.delete("member::" + x.getMemberId());
 			});
 			party.setPartyStatus(Status.DISABLED);
 			try {

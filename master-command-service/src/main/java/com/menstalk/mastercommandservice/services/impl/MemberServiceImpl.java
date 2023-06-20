@@ -73,9 +73,6 @@ public class MemberServiceImpl implements MemberService {
             try {
                 memberList = memberRepository.saveAll(memberList);
                 memberRepository.flush();
-                memberList.forEach(x -> {
-                    redisTemplate.delete("member::" + x.getMemberId());
-                });
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new CustomException("DB ERROR!");
@@ -103,7 +100,6 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    @CacheEvict(value = "member", key = "#memberId")
     public void disableMember(Long memberId) {
         try {
             Member member = new Member();
@@ -121,7 +117,6 @@ public class MemberServiceImpl implements MemberService {
                     party.setPartyStatus(Status.DISABLED);
                 }
                 memberRepository.save(member);
-                redisTemplate.delete("member::" + memberId);
                 partyRepository.save(party);
             } catch (Exception e) {
                 throw new CustomException("DB ERROR");
